@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './App.scss';
 
 import {Container, Row, Col, Form, FloatingLabel, Button} from 'react-bootstrap';
 import { ImageCard } from './components/ImageCard';
-import images from './data';
-
 
 function App() {
   const [relatedWords, setRelatedWords] = useState([""]);
 
+  const [images, setImages] = useState({});
+  const [showImages, setShowImages] = useState(false);
+  
   function searchImgur(event){
     event.preventDefault();
 
@@ -18,10 +20,33 @@ function App() {
     const formData = form.elements;
     console.log(formData.searchKeyword.value)
 
-    // API REQUEST 
-    console.log(process.env.REACT_APP_IMGUR_PUBLIC_CLIENT_ID);
+    const searchWord = formData.searchKeyword.value;
 
-    // set values within store for cache? (or add new keywords to display)
+    // API REQUEST
+    axios.get(`https://api.imgur.com/3/gallery/search/top?q=${searchWord}`, {
+      headers: { 'Authorization': `CLIENT-ID ${process.env.REACT_APP_IMGUR_PUBLIC_CLIENT_ID}`}
+    }).then(response => {
+      const foundImages = response.data.data.map((data) => {
+        if (data.images){
+          const linkedImages = data.images.map((image) => {
+            return {
+              "link": image.link,
+              "title": image.title,
+            }
+          });
+          return linkedImages
+        } else if (data.link) {
+          return {
+            "link": data.link,
+            "title": data.title,
+          }
+        }
+      })
+      setImages(foundImages.flat(Infinity))
+      setShowImages(true)
+    });
+    
+    // set values within find keyword tags to display from API responses)
     setRelatedWords([formData.searchKeyword.value])
   }
 
@@ -47,15 +72,15 @@ function App() {
         </Form>
 
         <Row className="mb-3" >
-          { relatedWords && <div> Related searches: {relatedWords} </div> }
+          { showImages && <div> Related searches: {relatedWords} </div> }
         </Row>
 
         <Row>
-          { images.map(data => (
+          { showImages && (images.map(data => (
             <Col className="mb-5" key={`${data.id}`}>
               <ImageCard data={data} />
             </Col>
-          ))}
+          )))}
         </Row>
       </Container>
     </div>

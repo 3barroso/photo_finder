@@ -14,6 +14,10 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
 
+### `ngrok https://localhost:3000`
+Runs proxy server so Imgur requests can be made without 429 error
+
+
 ### `yarn test`
 
 Launches the test runner in the interactive watch mode.\
