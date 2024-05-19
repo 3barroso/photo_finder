@@ -12,47 +12,47 @@ function App() {
 
   const [images, setImages] = useState({});
   const [showImages, setShowImages] = useState(false);
+
+  const [showFilters, setShowFilters] = useState(false);
+  const toggleShowFilters = () => setShowFilters(!showFilters);
+  // button on click show section with more filters (page size, sort, top- window)
+
+  // select dropdown to determine how many images are shown (useState)
+  
+  // SHOW MORE button click adds to shownImages -> adds based on page view size (?)
   
   function searchImgur(event){
     event.preventDefault();
 
     const form = event.target;
     const formData = form.elements;
-    console.log(formData.searchKeyword.value)
-
     const searchWord = formData.searchKeyword.value;
+    // take select input for search style (top / viral / recent "time")
 
-    // API REQUEST
-    axios.get(`https://api.imgur.com/3/gallery/search/top?q=${searchWord}`, {
+    axios.get(`https://api.imgur.com/3/gallery/search/top/1?q=${searchWord}`, {
       headers: { 'Authorization': `CLIENT-ID ${process.env.REACT_APP_IMGUR_PUBLIC_CLIENT_ID}`}
     }).then(response => {
       const foundImages = response.data.data.map((data) => {
         if (data.images){
-          const linkedImages = data.images.map((image) => {
-            return {
-              "link": image.link,
-              "title": image.title,
-            }
-          });
-          return linkedImages
+          return data.images
         } else if (data.link) {
-          return {
-            "link": data.link,
-            "title": data.title,
-          }
+          return data
         }
       })
       setImages(foundImages.flat(Infinity))
       setShowImages(true)
     });
     
-    // set values within find keyword tags to display from API responses)
-    setRelatedWords([formData.searchKeyword.value])
+    // set values within find keyword tags to display from API responses
+    setRelatedWords([searchWord])
   }
+
+  // related words get set from useEffect? (after images is populated?)
+
+  // create new prop / state variable that is pagination from 
 
   return (
     <div className="App">
-      {/* <header className="App-header"> </header> */}
       
       <Container>
         <h1>Photo Finder</h1>
@@ -67,21 +67,25 @@ function App() {
               <Button type="submit">
                 Search
               </Button>
+              <Button className="ms-2" onClick={toggleShowFilters} >  {showFilters ? "Hide" : "Show"} filters </Button>
             </Col>
           </Row>
         </Form>
+        { showFilters && <div> FILTER DIVs </div>}
 
         <Row className="mb-3" >
           { showImages && <div> Related searches: {relatedWords} </div> }
         </Row>
 
         <Row>
-          { showImages && (images.map(data => (
-            <Col className="mb-5" key={`${data.id}`}>
+          { showImages && (images.map((data, index) => (
+            <Col className="mb-3" key={`${index}`}>
               <ImageCard data={data} />
             </Col>
           )))}
         </Row>
+
+        { showImages && images.length == 0 && <div> no content (or loading?) </div> }
       </Container>
     </div>
 
