@@ -1,29 +1,26 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 import './App.scss';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import loadingBearImage from './Floof_bear.png'
+
 import {Container, Row, Col, Form, FloatingLabel, Button} from 'react-bootstrap';
 import { ImageCard } from './components/ImageCard';
 
 function App() {
-  const [relatedWords, setRelatedWords] = useState([""]);
-  // Populate after images are filled after scrapping [tags]
-
   const [images, setImages] = useState([]);
-  const [showImages, setShowImages] = useState(false);
+  const [loadedImages, setLoadedImages] = useState(false);
   const [displayedImagesCount, setDisplayedImagesCount] = useState(15);
-  const showMoreImages = () => setDisplayedImagesCount(displayedImagesCount + 15)
-
+  const showMoreImages = () => setDisplayedImagesCount(displayedImagesCount + 15);
   const displayImages = images.slice(0, displayedImagesCount);
 
   const [showFilters, setShowFilters] = useState(false);
   const toggleShowFilters = () => setShowFilters(!showFilters);
-  const filterFormStyle = {'display': `${showFilters ? 'block' : 'none'}`}
+  const filterFormStyle = {'display': `${showFilters ? 'block' : 'none'}`};
   
   function searchImgur(event){
     event.preventDefault();
@@ -35,25 +32,22 @@ function App() {
     const imgurBaseUrl = "https://api.imgur.com/3/gallery/search/";
     setDisplayedImagesCount(parseInt(formData.imagesDisplayed.value));
     
-    // setShowImages(false) --> rename to be about (loading search to show status of loading / loaded)
+    setLoadedImages(false);
     axios.get((imgurBaseUrl + searchQuery), {
       headers: { 'Authorization': `CLIENT-ID ${process.env.REACT_APP_IMGUR_PUBLIC_CLIENT_ID}`}
     }).then(response => {
       const foundImages = response.data.data.map((data) => {
         if (data.images){
-          return data.images
+          return data.images;
         } else if (data.link) {
-          return data
+          return data;
         }
-      })
-      setImages(foundImages.flat(Infinity))
+      });
+      foundImages.length ? setImages(foundImages.flat(Infinity)) : toast.info("Search complete, no images found") ;
     }).catch(error => {
       toast.error(error.message);
     });
-    setShowImages(true)
-    
-    // set values within find keyword tags to display from API responses
-    setRelatedWords([searchWord])
+    setLoadedImages(true);
   }
 
   return (
@@ -64,7 +58,7 @@ function App() {
           <ToastContainer />
         </div>
 
-        <h1>Photo Finder</h1>
+        <h1 className="mb-2 mt-2">Photo Finder</h1>
         <Form method="post" onSubmit={searchImgur}>
           <Row className="justify-content-md-center">
             <Col>
@@ -101,24 +95,25 @@ function App() {
           </Row>
         </Form>
 
-        <Row className="mb-3" >
-          { showImages && <div> Related searches: {relatedWords} </div> }
-        </Row>
-
         <Row>
-          { showImages && images.length && (displayImages.map((data, index) => (
+          { loadedImages && images.length > 0 && (displayImages.map((data, index) => (
             <Col className="mb-3" key={`${index}`}>
               <ImageCard data={data} />
             </Col>
           )))}
         </Row>
 
-        { showImages && !images.length && <div> no content (or loading?) </div> }
-
-        { showImages && (
+        { loadedImages && !images.length && (
           <div>
-            Images found: {images.length}
-            <Button variant="light" className="mb-3" onClick={showMoreImages}> Show more images </Button>
+            <div>Thanks for searching</div>
+            <img src={loadingBearImage} alt="Fluffy cartoon bear with party hat" />
+          </div>
+        )}
+
+        { loadedImages && (
+          <div>
+            <div className="mb-3">Images found: {images.length}</div>
+            { images.length > 0 && (<Button variant="light" className="mb-3" onClick={showMoreImages}> Show more images </Button>)}
           </div>
         )}
       </Container>

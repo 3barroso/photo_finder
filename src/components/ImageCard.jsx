@@ -16,7 +16,7 @@ export function ImageCard({ data }){
           {data.type == "video/mp4" ? (
               <video autoPlay muted src={data.link} width="100%" height={"auto"}></video>
             ) : (
-            <img style={{objectFit: "cover", maxHeight: "100vh"}} src={data.link} alt="alt text from api here" width={220}/>
+            <img style={{objectFit: "cover", maxHeight: "100vh"}} src={data.link} alt={data.description} width={220}/>
             )
           }
           {data.title && (data.title.length > 25 ? data.title.substring(0, 25) + "..." : data.title)}
@@ -30,7 +30,7 @@ export function ImageCard({ data }){
           {data.type == "video/mp4" ? (
             <video autoPlay src={data.link} width="100%" height={"auto"}></video>
           ) : (
-            <img src={data.link} alt="alt text from api here" width="100%" height={"auto"} />
+            <img src={data.link} alt={data.description} width="100%" height={"auto"} />
           )}
           { data.title && data.title }
           { data.description && <div> {data.description} </div> }
