@@ -13,7 +13,7 @@ export function ImageCard({ data }){
       <Card className="shadow-sm bg-white rounded" onClick={openModal} >
         <Card.Body className="d-flex flex-column" >
           <Col className="d-flex flex-column align-items-center" style={{maxHeight:"320px", overflow:"scroll"}} >
-          {data.type == "video/mp4" ? (
+          {data.type === "video/mp4" ? (
               <video autoPlay muted src={data.link} width="100%" height={"auto"}></video>
             ) : (
             <img style={{objectFit: "cover", maxHeight: "100vh"}} src={data.link} alt={data.description} width={220}/>
@@ -27,7 +27,7 @@ export function ImageCard({ data }){
       <Modal show={showImage} onHide={closeModal} size="xl">
         <Modal.Header closeButton></Modal.Header>
         <Modal.Body>
-          {data.type == "video/mp4" ? (
+          {data.type === "video/mp4" ? (
             <video autoPlay src={data.link} width="100%" height={"auto"}></video>
           ) : (
             <img src={data.link} alt={data.description} width="100%" height={"auto"} />
