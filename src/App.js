@@ -24,6 +24,7 @@ function App() {
   
   function searchImgur(event){
     event.preventDefault();
+    searchFlickr(event);
 
     const formData = event.target.elements;
     const searchWord = formData.searchKeyword.value;
@@ -50,6 +51,23 @@ function App() {
     setLoadedImages(true);
   }
 
+  function searchFlickr(event){
+    event.preventDefault();
+
+    // ability to use different methods for flickr search 
+    // flickr.photos.getRecent should be used if no search is inputted
+    const flickrBaseUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&format=json&nojsoncallback=1";
+    const flickrAPIkey = `&api_key=${process.env.REACT_APP_FLICKR_PUBLIC_KEY}`
+    // const searchQuery = `${sortedBy}?q=${searchWord}`;
+    axios.get(flickrBaseUrl + flickrAPIkey).then(response => {
+      console.log("API Resp: ", response.data.photos.photo)
+      response.data.photos.photo.length ? setImages(response.data.photos.photo) : toast.info("Search complete, no images found");
+    }).catch(error => {
+      toast.error(error.message);
+    });
+    setLoadedImages(true);
+  };
+
   return (
     <div className="App">
       
@@ -59,7 +77,7 @@ function App() {
         </div>
 
         <h1 className="mb-2 mt-2">Photo Finder</h1>
-        <Form method="post" onSubmit={searchImgur}>
+        <Form method="post" onSubmit={searchFlickr}>
           <Row className="justify-content-md-center">
             <Col>
               <FloatingLabel label="Search Imgur" className="mb-3" controlId="searchKeyword">
